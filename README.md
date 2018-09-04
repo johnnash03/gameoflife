@@ -1,1 +1,1 @@
-Game of lift in vanilla js.
+Game of life in vanilla js.
