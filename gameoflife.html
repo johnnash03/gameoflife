@@ -1,0 +1,120 @@
+<style>
+  #container {
+    width : 500px;
+    height: 500px;
+    background: #ccc;
+  }
+  .cell {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+  }
+  .alive {
+    background: green;
+  }
+</style>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Game of life</title>
+  </head>
+  <body>
+    <div id="container"></div>
+    <button id="start">Start</button>
+  </body>
+</html>
+
+<script>
+  let GameOfLife = (function() {
+    let state = {};
+    function init() {
+      paint();
+      attachClickEvent();
+      attachStartEvent();
+    }
+
+    function paint() {
+      let matrix = "";
+      for( let i=0; i<50; i++) {
+        for( let j=0; j<50; j++) {
+          let aliveClass = "";
+          if( state.hasOwnProperty(`${i}_${j}`) ) {
+            aliveClass = "alive"
+          }
+          matrix += `<div id=${i}_${j} class="cell ${aliveClass}"></div>`;
+        }
+      }
+      document.getElementById("container").innerHTML = matrix;
+    }
+
+    function attachClickEvent() {
+      let className = document.getElementsByClassName("cell");
+      Array.from(className).forEach((element) => {
+        element.addEventListener('click', cellClicked);
+      });
+    }
+
+    function cellClicked(e) {
+      let el = document.getElementById(e.target.id);
+      state[e.target.id] = true; 
+      el.className += " alive";
+    }
+
+    function attachStartEvent() {
+      let el = document.getElementById("start");
+      el.addEventListener('click', start);
+    }
+
+    function start() {
+      setInterval(nextGeneration, 500);
+    }
+    function nextGeneration() {
+      let newState = {};
+      for( let i=0; i<50; i++) {
+        for( let j=0; j<50; j++) {
+          let aliveNeighbours = calcAliveNeighbours(i, j); 
+
+          if(state.hasOwnProperty(`${i}_${j}`)) {
+            // alive
+            // console.log("alive ", i, ",", j, "=>", aliveNeighbours)
+            if(aliveNeighbours == 2 || aliveNeighbours == 3) {
+              newState[`${i}_${j}`] = true;
+            }
+          } else {
+            if(aliveNeighbours == 3) {
+              // console.log("dead ", i, ",", j, "=>", aliveNeighbours)
+              newState[`${i}_${j}`] = true;
+            }
+
+          }
+        }
+      }
+      state = newState;
+      // console.log(newState)
+      paint();
+
+    }
+
+    function calcAliveNeighbours(i, j) {
+      let neighbours = [{x: -1, y: 0},{x: -1, y: -1},{x: -1, y: 1},{x: 0, y: -1},{x: 0, y: 1},{x: 1, y: 0},{x: 1, y: -1},{x: 1, y: 1}];
+      let aliveNeighbours = 0;
+      neighbours.forEach(({x, y}) => {
+        if(cellExists(i+x, j+y) && state.hasOwnProperty(`${i+x}_${j+y}`)) {
+          aliveNeighbours++;
+        }
+      })
+      return aliveNeighbours;
+    }
+
+    function cellExists(i, j) {
+      if(i>=0 && i<50 && j>=0 && j<50)
+        return true;
+      return false;
+    }
+    return {
+      init
+    }
+
+  })()
+  GameOfLife.init();
+</script>
